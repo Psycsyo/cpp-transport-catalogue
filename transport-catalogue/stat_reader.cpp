@@ -4,7 +4,7 @@
 
 namespace Transport {
 
-    void PrintBusData(std::ostream& out, const Catalogue& catalogue, const std::string& route_number) {
+void PrintBusData(std::ostream& out, const Catalogue& catalogue, const std::string& route_number) {
         if (catalogue.FindRoute(route_number)) {
             out << "Bus " << route_number << ": " << catalogue.RouteInformation(route_number).stops_count << " stops on route, "
                 << catalogue.RouteInformation(route_number).unique_stops_count << " unique stops, " << std::setprecision(6)
@@ -18,7 +18,7 @@ namespace Transport {
     void PrintStopData(std::ostream& out, const Catalogue& catalogue, const std::string& stop_name) {
         if (catalogue.FindStop(stop_name)) {
             out << "Stop " << stop_name << ": ";
-            std::unordered_set<std::string> buses = catalogue.GetBusesOnStop(stop_name);
+            std::set<std::string> buses = catalogue.GetBusesOnStop(stop_name);
             if (!buses.empty()) {
                 out << "buses ";
                 for (const auto& bus : buses) {
@@ -35,7 +35,7 @@ namespace Transport {
         }
     }
 
-    void ProcessRequests(std::ostream& out, std::istream& in, Catalogue& catalogue) {
+    void ProcessRequests(std::istream& in, Catalogue& catalogue, std::ostream& out) {
         size_t requests_count;
         in >> requests_count;
         in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -55,4 +55,5 @@ namespace Transport {
             }
         }
     }
+    
 }
