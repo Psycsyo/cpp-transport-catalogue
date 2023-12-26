@@ -6,5 +6,5 @@ using namespace Transport;
 int main() {
     Catalogue catalogue;
     FillCatalogue(std::cin, catalogue);
-    ProcessRequests(std::cout, catalogue);
+    ProcessRequests(std::cin, catalogue, std::cout);
 }
