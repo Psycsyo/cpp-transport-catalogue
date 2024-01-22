@@ -1,7 +1,7 @@
 #include "input_reader.h"
 #include "stat_reader.h"
 
-using namespace Transport;
+using namespace transport;
 
 int main() {
     Catalogue catalogue;
