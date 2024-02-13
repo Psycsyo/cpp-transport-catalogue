@@ -1,15 +1,3 @@
-/*
- * В этом файле вы можете разместить классы/структуры, которые являются частью предметной области (domain)
- * вашего приложения и не зависят от транспортного справочника. Например Автобусные маршруты и Остановки.
- *
- * Их можно было бы разместить и в transport_catalogue.h, однако вынесение их в отдельный
- * заголовочный файл может оказаться полезным, когда дело дойдёт до визуализации карты маршрутов:
- * визуализатор карты (map_renderer) можно будет сделать независящим от транспортного справочника.
- *
- * Если структура вашего приложения не позволяет так сделать, просто оставьте этот файл пустым.
- *
- */
-
 #pragma once
 
 #include "geo.h"
@@ -17,27 +5,50 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <map>
 #include <unordered_map>
 
 namespace transport {
+	namespace type {
+		struct Stop {
+			std::string name;
+			geo::Coordinates coordinates;
+			std::set<std::string> buses_by_stop;
+		};
 
-struct Stop {
-    std::string name;
-    geo::Coordinates coordinates;
-    std::set<std::string> buses_by_stop;
-};
+		struct Bus {
+			std::string number;
+			std::vector<Stop*> stops;
+			bool circle;
+		};
+	}
 
-struct Bus {
-    std::string number;
-    std::vector<const Stop*> stops;
-    bool is_circle;
-};
+	namespace data {
+		struct Stop {
+			std::string name;
+			std::set<std::string> buses_by_stop;
+		};
 
-struct BusStat {
-    size_t stops_count;
-    size_t unique_stops_count;
-    double route_length;
-    double curvature;
-};
+		struct Bus {
+			std::string name;
+			unsigned int stop_count;
+			unsigned int unique_stop_count;
+			double route_length;
+			double curvature;
+		};
+	}
+}
 
-} // namespace transport
+namespace json_reader {
+	struct Stop {
+		std::string stop_name;
+		geo::Coordinates coordinates;
+		std::map<std::string, int> stop_distances;
+	};
+
+	struct Bus {
+		std::string bus_number;
+		std::vector<std::string> stops;
+		bool is_circle;
+	};
+}
