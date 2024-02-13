@@ -4,7 +4,6 @@
 #include <fstream>
 
 int main() {
-    setlocale(LC_ALL, "rus");
     std::fstream input("input.json");
     if (!input) std::cout << "input error" << std::endl;
 
