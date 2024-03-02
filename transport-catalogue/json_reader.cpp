@@ -3,28 +3,28 @@
 void JsonReader::ProcessRequests(const json::Node& stat_requests, RequestHandler& request_handler) const {
     json::Array result;
     for (auto& request : stat_requests.AsArray()) {
-        const auto& request_map = request.AsMap();
+        const auto& request_map = request.AsDict();
         if (!request_map.count("type")) {
             continue;
         }
 
         const auto& type = request_map.at("type").AsString();
         if (type == "Stop") {
-            result.push_back(PrintStop(request_map, request_handler).AsMap());
+            result.push_back(PrintStop(request_map, request_handler).AsDict());
         }
         if (type == "Bus") {
-            result.push_back(PrintBus(request_map, request_handler).AsMap());
+            result.push_back(PrintBus(request_map, request_handler).AsDict());
         }
         if (type == "Map") {
-            result.push_back(PrintMap(request_map, request_handler).AsMap());
+            result.push_back(PrintMap(request_map, request_handler).AsDict());
         }
     }
 
     json::Print(json::Document{ result }, std::cout);
 }
-//GetStatRequests changed to GetDataRequests
+
 const json::Node& JsonReader::GetDataRequests() const {
-    if (const auto* ptr = std::get_if<json::Dict>(&input_.GetRoot())) {
+    if (const auto* ptr = std::get_if<json::Dict>(&input_.GetRoot().GetValue())) {
         if (auto it = ptr->find("stat_requests"); it != ptr->end()) {
             return it->second;
         }
@@ -33,7 +33,7 @@ const json::Node& JsonReader::GetDataRequests() const {
 }
 
 const json::Node& JsonReader::GetRenderSettings() const {
-    if (const auto* ptr = std::get_if<json::Dict>(&input_.GetRoot())) {
+    if (const auto* ptr = std::get_if<json::Dict>(&input_.GetRoot().GetValue())) {
         if (auto it = ptr->find("render_settings"); it != ptr->end()) {
             return it->second;
         }
@@ -42,7 +42,7 @@ const json::Node& JsonReader::GetRenderSettings() const {
 }
 
 const json::Node& JsonReader::GetBaseRequests() const {
-    if (const auto* ptr = std::get_if<json::Dict>(&input_.GetRoot())) {
+    if (const auto* ptr = std::get_if<json::Dict>(&input_.GetRoot().GetValue())) {
         if (auto it = ptr->find("base_requests"); it != ptr->end()) {
             return it->second;
         }
@@ -56,7 +56,7 @@ void JsonReader::FillCatalogue(transport::Catalogue& catalogue) {
     std::vector<json_reader::Bus> query_bus;
 
     for (auto& request_stops : arr) {
-        const auto& request_stops_map = request_stops.AsMap();
+        const auto& request_stops_map = request_stops.AsDict();
         const auto& type = request_stops_map.at("type").AsString();
         if (type == "Stop") {
             query_stop.push_back(FillStop(request_stops_map));
@@ -112,7 +112,7 @@ json_reader::Stop JsonReader::FillStop(const json::Dict& request_map) const {
     geo::Coordinates coordinates = { request_map.at("latitude").AsDouble(), request_map.at("longitude").AsDouble() };
     std::map<std::string, int> stop_distances;
 
-    auto& distances = request_map.at("road_distances").AsMap();
+    auto& distances = request_map.at("road_distances").AsDict();
     for (auto& [stop_name, dist] : distances) {
         stop_distances.emplace(stop_name, dist.AsInt());
     }
