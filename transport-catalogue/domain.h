@@ -4,51 +4,48 @@
 
 #include <string>
 #include <vector>
-#include <set>
-#include <map>
-#include <unordered_map>
+#include <string_view>
 
-namespace transport {
-	namespace type {
-		struct Stop {
-			std::string name;
-			geo::Coordinates coordinates;
-			std::set<std::string> buses_by_stop;
-		};
+namespace tc_project {
+    struct Stop {
+        std::string name;
+        geo::Coordinates coordinates;
+    };
 
-		struct Bus {
-			std::string number;
-			std::vector<Stop*> stops;
-			bool circle;
-		};
-	}
+    struct Bus {
+        std::string name;
+        std::vector<const Stop*> stops;
+        bool is_roundtrip;
+    };
 
-	namespace data {
-		struct Stop {
-			std::string name;
-			std::set<std::string> buses_by_stop;
-		};
+    struct BusInfo {
+        int stops_count;
+        int unique_stops_count;
+        int distance;
+        double curvature;
+    };
 
-		struct Bus {
-			std::string name;
-			unsigned int stop_count;
-			unsigned int unique_stop_count;
-			double route_length;
-			double curvature;
-		};
-	}
-}
+    struct RouteWeight {
+        double weight = 0.0;
+        int span_count = 0;
+        std::string_view name;
+        bool is_waiting = false;
 
-namespace json_reader {
-	struct Stop {
-		std::string stop_name;
-		geo::Coordinates coordinates;
-		std::map<std::string, int> stop_distances;
-	};
+        bool operator<(const RouteWeight& other) const {
+            return this->weight < other.weight;
+        }
 
-	struct Bus {
-		std::string bus_number;
-		std::vector<std::string> stops;
-		bool is_circle;
-	};
+        bool operator>(const RouteWeight& other) const {
+            return this->weight > other.weight;
+        }
+
+        RouteWeight operator+(const RouteWeight& other) const {
+            RouteWeight result;
+            result.weight = weight + other.weight;
+            result.span_count = span_count + other.span_count;
+            return result;
+        }
+    };
+
+    inline const double EPSILON = 1e-6;
 }
