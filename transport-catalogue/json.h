@@ -17,7 +17,8 @@ namespace json {
         using runtime_error::runtime_error;
     };
 
-    class Node final : private std::variant<std::nullptr_t, Array, Dict, bool, int, double, std::string> {
+    class Node final
+            : private std::variant<std::nullptr_t, Array, Dict, bool, int, double, std::string> {
     public:
         using variant::variant;
         using Value = variant;
@@ -106,6 +107,7 @@ namespace json {
         const Value& GetValue() const {
             return *this;
         }
+
         Value& GetValue() {
             return *this;
         }
@@ -118,7 +120,7 @@ namespace json {
     class Document {
     public:
         explicit Document(Node root)
-            : root_(std::move(root)) {
+                : root_(std::move(root)) {
         }
 
         const Node& GetRoot() const {
