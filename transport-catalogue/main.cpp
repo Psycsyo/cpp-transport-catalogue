@@ -1,27 +1,10 @@
 #include "json_reader.h"
-#include "request_handler.h"
-
-#include <fstream>
+#include <iostream>
+using namespace std;
 
 int main() {
-    setlocale(LC_ALL, "rus");
-    std::fstream input("input.json");
-    if (!input) std::cout << "input error" << std::endl;
-
-    std::fstream output("output.xml");
-    if (!output) std::cout << "output error" << std::endl;
-
-    JsonReader json_doc(input);
-    input.close();
-    transport::Catalogue catalogue;
-    json_doc.FillCatalogue(catalogue);
-
-    const auto& stat_requests = json_doc.GetDataRequests();
-    const auto& render_settings = json_doc.GetRenderSettings().AsDict();
-    const auto& renderer = json_doc.FillRenderSettings(render_settings);
-
-    RequestHandler request(catalogue, renderer);
-    json_doc.ProcessRequests(stat_requests, request);
-    request.RenderMap().Render(output);
-    output.close();
+    tc_project::transport_catalogue::TransportCatalogue catalogue;
+    tc_project::map_renderer::MapRenderer renderer;
+    tc_project::json_reader::JsonReader json_reader(catalogue, renderer);
+    json_reader.RequestsProcessing(cin, cout);
 }
