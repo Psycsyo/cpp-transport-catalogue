@@ -1,23 +1,26 @@
 #pragma once
 
-#include "json.h"
 #include "transport_catalogue.h"
 #include "map_renderer.h"
+#include "router.h"
+#include "graph.h"
+#include "transport_router.h"
 
-class RequestHandler {
-public:
-    RequestHandler(const transport::Catalogue& catalogue, const renderer::MapRenderer& renderer) 
-        : catalogue_(catalogue), renderer_(renderer) {}
+#include <optional>
+#include <unordered_set>
+#include <string_view>
+#include <memory>
 
-    svg::Document RenderMap() const;
+namespace tc_project::request_handler {
+    class RequestHandler {
+    public:
+        RequestHandler(const transport_catalogue::TransportCatalogue& db, const map_renderer::MapRenderer& renderer);
+        std::optional<BusInfo> GetBusInfo(const std::string_view& bus_name) const;
+        std::optional<const std::unordered_set<const Bus*>*> GetBusesByStop(const std::string_view& stop_name) const;
+        svg::Document RenderMap() const;
 
-    bool HasBus(const std::string_view bus_number) const;
-    bool HasStop(const std::string_view stop_name) const;
-
-    std::optional<transport::data::Bus> GetBusData(const std::string bus_number) const;
-    const std::set<std::string> GetBusesByStop(std::string_view stop_name) const;
-private:
-    const transport::Catalogue& catalogue_;
-    const renderer::MapRenderer& renderer_;
-
-};
+    private:
+        const transport_catalogue::TransportCatalogue& db_;
+        const map_renderer::MapRenderer& renderer_;
+    };
+}
