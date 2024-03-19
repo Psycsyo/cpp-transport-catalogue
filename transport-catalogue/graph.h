@@ -12,6 +12,8 @@ using EdgeId = size_t;
 
 template <typename Weight>
 struct Edge {
+    std::string name;
+    size_t quality;
     VertexId from;
     VertexId to;
     Weight weight;
@@ -68,7 +70,8 @@ const Edge<Weight>& DirectedWeightedGraph<Weight>::GetEdge(EdgeId edge_id) const
 
 template <typename Weight>
 typename DirectedWeightedGraph<Weight>::IncidentEdgesRange
-DirectedWeightedGraph<Weight>::GetIncidentEdges(VertexId vertex) const {
+    DirectedWeightedGraph<Weight>::GetIncidentEdges(VertexId vertex) const {
     return ranges::AsRange(incidence_lists_.at(vertex));
 }
-}  // namespace graph
+
+} // namespace graph
