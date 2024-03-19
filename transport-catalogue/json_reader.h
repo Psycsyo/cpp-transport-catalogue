@@ -1,60 +1,39 @@
 #pragma once
 
-#include "transport_catalogue.h"
 #include "json.h"
-#include "request_handler.h"
+#include "transport_catalogue.h"
 #include "map_renderer.h"
-#include "json_builder.h"
-#include "transport_router.h"
+#include "request_handler.h"
 
-#include <string>
 #include <iostream>
-#include <iomanip>
-#include <utility>
-#include <vector>
-#include <tuple>
 
-namespace tc_project::json_reader {
-    using json::Document;
-    using json::Dict;
-    using json::Node;
+class JsonReader {
+public:
+    JsonReader(std::istream& input)
+        : input_(json::Load(input))
+    {}
 
-    class JsonReader {
-    public:
+    const json::Node& GetBaseRequests() const;
+    const json::Node& GetStatRequests() const;
+    const json::Node& GetRenderSettings() const;
+    const json::Node& GetRoutingSettings() const;
 
-        template <typename TC, typename MR>
-        explicit JsonReader(TC&& catalogue, MR&& renderer)
-                        : catalogue_(std::forward<TC>(catalogue)), renderer_(std::forward<MR>(renderer)), handler_(catalogue_, renderer_) {}
+    void ProcessRequests(const json::Node& stat_requests, RequestHandler& rh) const;
 
-        void RequestsProcessing(std::istream& input, std::ostream& output);
+    void FillCatalogue(transport::Catalogue& catalogue);
+    renderer::MapRenderer FillRenderSettings(const json::Node& settings) const;
+    transport::Router FillRoutingSettings(const json::Node& settings) const;
 
-    private:
-        void BasesProcessing();
-        void StopProcessing(const Dict& stop);
-        void BusProcessing(const Dict& bus);
-        void StatProcessing(std::ostream& output);
-        void ParseBus(const std::string& name, int id);
-        void ParseStop(const std::string& name, int id);
-        void RenderProcessing();
-        void ParseMap(int id);
-        void ParseRoute(const graph::Router<RouteWeight>& router, int id, const std::string& from, const std::string& to);
-        transport_catalogue::TransportCatalogue catalogue_;
-        map_renderer::MapRenderer renderer_;
-        std::vector<Node> builder_data_;
-        transport_router::TransportRouter transport_router_;
-        request_handler::RequestHandler handler_;
-        std::vector<Dict> base_requests_;
-        std::vector<Dict> stat_requests_;
-        Dict json_render_settings_;
-        std::map<std::string , std::map<std::string, Node>> road_distances_;
+    const json::Node PrintRoute(const json::Dict& request_map, RequestHandler& rh) const;
+    const json::Node PrintStop(const json::Dict& request_map, RequestHandler& rh) const;
+    const json::Node PrintMap(const json::Dict& request_map, RequestHandler& rh) const;
+    const json::Node PrintRouting(const json::Dict& request_map, RequestHandler& rh) const;
 
-        struct StatSettings {
-            std::string type;
-            std::string name;
-            std::string from;
-            std::string to;
-            int id = 0;
-        };
-    };
+private:
+    json::Document input_;
+    json::Node dummy_ = nullptr;
 
-}
+    std::tuple<std::string_view, geo::Coordinates, std::map<std::string_view, int>> FillStop(const json::Dict& request_map) const;
+    void FillStopDistances(transport::Catalogue& catalogue) const;
+    std::tuple<std::string_view, std::vector<const transport::Stop*>, bool> FillRoute(const json::Dict& request_map, transport::Catalogue& catalogue) const;
+};
