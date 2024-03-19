@@ -1,46 +1,37 @@
 #pragma once
 
-#include "domain.h"
 #include "router.h"
-#include "graph.h"
 #include "transport_catalogue.h"
 
-#include <string_view>
-#include <unordered_map>
 #include <memory>
 
-namespace tc_project::transport_router {
-    class TransportRouter {
-    private:
+namespace transport {
 
-        struct TransportRouterHasher {
-            std::size_t operator()(std::string_view str) const {
-                return sw_hasher_(str);
-            }
+class Router {
+public:
+	Router() = default;
 
-            std::size_t operator()(const std::pair<size_t , size_t>& key) const {
-                std::size_t h1 = s_hasher_(key.first);
-                std::size_t h2 = s_hasher_(key.second);
-                return h1 + h2 * 37;
-            }
+	Router(const int bus_wait_time, const double bus_velocity)
+		: bus_wait_time_(bus_wait_time)
+		, bus_velocity_(bus_velocity) {}
 
-            std::hash<std::string_view> sw_hasher_;
-            std::hash<size_t> s_hasher_;
-        };
+	Router(const Router& settings, const Catalogue& catalogue) {
+		bus_wait_time_ = settings.bus_wait_time_;
+		bus_velocity_ = settings.bus_velocity_;
+		BuildGraph(catalogue);
+	}
 
-    public:
-        void SetBusWaitTime(int bus_wait_time);
-        void SetBusVelocity(double bus_velocity);
-        void BuildGraph(const transport_catalogue::TransportCatalogue &catalogue, size_t size);
-        size_t GetVertex(const std::string& name) const;
-        const graph::DirectedWeightedGraph<RouteWeight>& GetGraph() const;
+	const graph::DirectedWeightedGraph<double>& BuildGraph(const Catalogue& catalogue);
+	const std::optional<graph::Router<double>::RouteInfo> FindRoute(const std::string_view stop_from, const std::string_view stop_to) const;
+	const graph::DirectedWeightedGraph<double>& GetGraph() const;
 
-    private:
-        std::unordered_map<std::string_view, std::pair<size_t, size_t>, TransportRouterHasher> vertex_id_;
-        int bus_wait_time_ = 0;
-        double bus_velocity_ = 0.0;
-        std::unique_ptr<graph::DirectedWeightedGraph<RouteWeight>> graph_;
+private:
+	int bus_wait_time_ = 0;
+	double bus_velocity_ = 0.0;
 
-    };
+	graph::DirectedWeightedGraph<double> graph_;
+	std::map<std::string, graph::VertexId> stop_ids_;
+	std::unique_ptr<graph::Router<double>> router_;
+};
 
 }
