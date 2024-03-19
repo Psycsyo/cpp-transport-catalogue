@@ -4,48 +4,28 @@
 
 #include <string>
 #include <vector>
-#include <string_view>
+#include <set>
+#include <unordered_map>
 
-namespace tc_project {
-    struct Stop {
-        std::string name;
-        geo::Coordinates coordinates;
-    };
+namespace transport {
 
-    struct Bus {
-        std::string name;
-        std::vector<const Stop*> stops;
-        bool is_roundtrip;
-    };
+struct Stop {
+    std::string name;
+    geo::Coordinates coordinates;
+    std::set<std::string> buses_by_stop;
+};
 
-    struct BusInfo {
-        int stops_count;
-        int unique_stops_count;
-        int distance;
-        double curvature;
-    };
+struct Bus {
+    std::string number;
+    std::vector<const Stop*> stops;
+    bool is_circle;
+};
 
-    struct RouteWeight {
-        double weight = 0.0;
-        int span_count = 0;
-        std::string_view name;
-        bool is_waiting = false;
+struct BusStat {
+    size_t stops_count;
+    size_t unique_stops_count;
+    double route_length;
+    double curvature;
+};
 
-        bool operator<(const RouteWeight& other) const {
-            return this->weight < other.weight;
-        }
-
-        bool operator>(const RouteWeight& other) const {
-            return this->weight > other.weight;
-        }
-
-        RouteWeight operator+(const RouteWeight& other) const {
-            RouteWeight result;
-            result.weight = weight + other.weight;
-            result.span_count = span_count + other.span_count;
-            return result;
-        }
-    };
-
-    inline const double EPSILON = 1e-6;
-}
+} // namespace transport
