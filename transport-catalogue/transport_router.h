@@ -17,11 +17,7 @@ namespace transport {
     public:
         Router() = default;
 
-        Router(const RouterSettings& settings)
-            : settings_(settings) {}
-
-        Router(const Router& settings, const Catalogue& catalogue) {
-            settings_ = settings.settings_;
+        Router(const RouterSettings& settings, const Catalogue& catalogue) : settings_(settings) {
             BuildGraph(catalogue);
         }
 
